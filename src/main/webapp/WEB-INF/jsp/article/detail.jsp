@@ -31,8 +31,7 @@
 					<td>
 						<div class="video-box">
 							<video controls
-								src="/usr/file/streamVideo?id=${article.extra.file__common__attachment['1'].id}&updateDate=${article.extra.file__common__attachment['1'].updateDate}">video
-								not supported
+								src="/usr/file/streamVideo?id=${article.extra.file__common__attachment['1'].id}&updateDate=${article.extra.file__common__attachment['1'].updateDate}">
 							</video>
 						</div>
 					</td>
@@ -44,9 +43,18 @@
 					<td>
 						<div class="video-box">
 							<video controls
-								src="/usr/file/streamVideo?id=${article.extra.file__common__attachment['2'].id}&updateDate=${article.extra.file__common__attachment['2'].updateDate}">video
-								not supported
+								src="/usr/file/streamVideo?id=${article.extra.file__common__attachment['2'].id}&updateDate=${article.extra.file__common__attachment['2'].updateDate}">
 							</video>
+						</div>
+					</td>
+				</tr>
+			</c:if>
+			<c:if test="${article.extra.file__common__attachment['3'] != null}">
+				<tr>
+					<th>첨부 파일 3</th>
+					<td>
+						<div class="img-box" style="max-width:500px;">
+							<img src="/usr/file/showImg?id=${article.extra.file__common__attachment['3'].id}&updateDate=${article.extra.file__common__attachment['3'].updateDate}" alt="" />
 						</div>
 					</td>
 				</tr>
@@ -86,7 +94,7 @@
 			ArticleWriteReplyForm__submitDone = true;
 
 			var startUploadFiles = function(onSuccess) {
-				if ( form.file__reply__0__common__attachment__1.value.length == 0 && form.file__reply__0__common__attachment__2.value.length == 0 ) {
+				if ( form.file__reply__0__common__attachment__1.value.length == 0 && form.file__reply__0__common__attachment__2.value.length == 0 && form.file__reply__0__common__attachment__3.value.length == 0 ) {
 					onSuccess();
 					return;
 				}
@@ -140,6 +148,7 @@
 					form.body.value = '';
 					form.file__reply__0__common__attachment__1.value = '';
 					form.file__reply__0__common__attachment__2.value = '';
+					form.file__reply__0__common__attachment__3.value = '';
 					ArticleWriteReplyForm__submitDone = false;
 				});
 			});
@@ -177,6 +186,15 @@
 						<div class="form-control-box">
 							<input type="file" accept="video/*"
 								name="file__reply__0__common__attachment__2">
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<th>첨부3 사진</th>
+					<td>
+						<div class="form-control-box">
+							<input type="file" accept="image/*"
+								name="file__reply__0__common__attachment__3">
 						</div>
 					</td>
 				</tr>
@@ -289,6 +307,21 @@
 			</div>
 		</div>
 		<div class="form-row">
+			<div class="form-control-label">첨부파일 3</div>
+			<div class="form-control-box">
+				<input type="file" accept="image/*"
+					data-name="file__reply__0__common__attachment__3" />
+			</div>
+		</div>
+		<div class="form-row">
+			<div class="form-control-label">첨부파일 3 삭제</div>
+			<div class="form-control-box">
+				<label><input type="checkbox"
+					data-name="deleteFile__reply__0__common__attachment__3" value="Y" />
+					삭제 </label>
+			</div>
+		</div>
+		<div class="form-row">
 			<div class="form-control-label">수정</div>
 			<div class="form-control-box">
 				<button type="submit">수정</button>
@@ -326,11 +359,11 @@
 
 		var fileInput1 = form['file__reply__' + id + '__common__attachment__1'];
 		var fileInput2 = form['file__reply__' + id + '__common__attachment__2'];
+		var fileInput3 = form['file__reply__' + id + '__common__attachment__3'];
 
-		var deleteFileInput1 = form["deleteFile__reply__" + id
-			+ "__common__attachment__1"];
-		var deleteFileInput2 = form["deleteFile__reply__" + id
-			+ "__common__attachment__2"];
+		var deleteFileInput1 = form["deleteFile__reply__" + id + "__common__attachment__1"];
+		var deleteFileInput2 = form["deleteFile__reply__" + id + "__common__attachment__2"];
+		var deleteFileInput3 = form["deleteFile__reply__" + id + "__common__attachment__3"];
 
 		if (deleteFileInput1.checked) {
 			fileInput1.value = '';
@@ -340,13 +373,16 @@
 			fileInput2.value = '';
 		}
 
+		if (deleteFileInput3.checked) {
+			fileInput2.value = '';
+		}
+
 		ReplyList__submitModifyFormDone = true;
 
 		// 파일 업로드 시작
 		var startUploadFiles = function() {
-			if (fileInput1.value.length == 0 && fileInput2.value.length == 0) {
-				if (deleteFileInput1.checked == false
-						&& deleteFileInput2.checked == false) {
+			if (fileInput1.value.length == 0 && fileInput2.value.length == 0 && fileInput3.value.length == 0) {
+				if (deleteFileInput1.checked == false && deleteFileInput2.checked == false && deleteFileInput3.checked == false) {
 					onUploadFilesComplete();
 					return;
 				}
@@ -398,8 +434,14 @@
 					for ( var fileNo in data.body.file__common__attachment ) {
 						var file = data.body.file__common__attachment[fileNo];
 
-						var html = '<video controls src="/usr/file/streamVideo?id=' + file.id + '&updateDate=' + file.updateDate + '">video not supported</video>';
-						$('.reply-list-box tbody > tr[data-id="' + id + '"] [data-file-no="' + fileNo + '"].video-box').append(html);
+						if(fileNo == 3){
+							var html = '<img src="/usr/file/showImg?id=' + file.id + '" style="max-width: 500px;">';
+							$('.reply-list-box tbody > tr[data-id="' + id + '"] [data-file-no="' + fileNo + '"].video-box').append(html);
+						}
+						else{
+							var html = '<video controls src="/usr/file/streamVideo?id=' + file.id + '&updateDate=' + file.updateDate + '">video not supported</video>';
+							$('.reply-list-box tbody > tr[data-id="' + id + '"] [data-file-no="' + fileNo + '"].video-box').append(html);
+						}
 					}
 				}
 			}
@@ -459,8 +501,8 @@
 		$('html').removeClass('reply-modify-form-modal-actived');
 	}
 
-	// 1초
-	ReplyList__loadMoreInterval = 1 * 1000;
+	// 10초
+	ReplyList__loadMoreInterval = 10 * 1000;
 
 	function ReplyList__loadMoreCallback(data) {
 		if (data.body.replies && data.body.replies.length > 0) {
@@ -511,16 +553,19 @@
 		html += '<td>';
 		html += '<div class="reply-body">' + reply.body + '</div>';
 
-		for ( var fileNo = 1; fileNo <= 2; fileNo++ ) {
+		for ( var fileNo = 1; fileNo <= 3; fileNo++ ) {
 			html += '<div class="video-box" data-video-name="reply__' + reply.id + '__common__attachment__' + fileNo + '" data-file-no="' + fileNo + '">';
 
 			if ( reply.extra.file__common__attachment && reply.extra.file__common__attachment[fileNo] ) {
 				var file = reply.extra.file__common__attachment[fileNo];
 
-				html += '<video controls src="/usr/file/streamVideo?id=' + file.id + '&updateDate=' + file.updateDate + '">video not supported</video>';
+				if(fileNo == 1 || fileNo == 2){
+					html += '<video controls src="/usr/file/streamVideo?id=' + file.id + '&updateDate=' + file.updateDate + '">video not supported</video>';
+				}
+				if(fileNo == 3){
+					html += '<img src="/usr/file/showImg?id=' + file.id + '" style="max-width: 500px;">';
+				}
 	        }
-			else {
-			}
 
 			html += '</div>';
 		}

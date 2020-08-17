@@ -1,6 +1,8 @@
 package com.sbs.jhs.at.controller;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,12 +10,16 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -85,18 +91,15 @@ public class FileController {
 				String fileExt = Util.getFileExtFromFileName(multipartFile.getOriginalFilename()).toLowerCase();
 				int fileSize = (int) multipartFile.getSize();
 				
-				boolean needToUpdate = relId != 0;
+				int oldFileId = fileService.getFileId(relTypeCode, relId, typeCode, type2Code, fileNo);
 
+				boolean needToUpdate = relId > 0;
+				
 				if (needToUpdate) {
-					int oldFileId = fileService.getFileId(relTypeCode, relId, typeCode, type2Code, fileNo);
-					
-					if ( oldFileId > 0 ) {
-						fileService.updateFile(oldFileId, originFileName, fileExtTypeCode, fileExtType2Code, fileExt,
-								fileBytes, fileSize);
+					fileService.updateFile(oldFileId, originFileName, fileExtTypeCode, fileExtType2Code, fileExt,
+							fileBytes, fileSize);
 
-						fileCache.refresh(oldFileId);
-					}
-
+					fileCache.refresh(oldFileId);
 				} else {
 					int fileId = fileService.saveFile(relTypeCode, relId, typeCode, type2Code, fileNo, originFileName,
 							fileExtTypeCode, fileExtType2Code, fileExt, fileBytes, fileSize);
@@ -125,6 +128,7 @@ public class FileController {
 				if (needToDelete) {
 					fileService.deleteFile(oldFileId);
 					fileCache.refresh(oldFileId);
+//					fileCache.invalidate(oldFileId);
 					deleteCount++;
 				}
 			}
@@ -136,5 +140,12 @@ public class FileController {
 
 		return new ResultData("S-1", String.format("%d개의 파일을 저장했습니다. %d개의 파일을 삭제했습니다.", fileIds.size(), deleteCount),
 				rsDataBody);
+	}
+	
+	@RequestMapping(value = "/usr/file/showImg", method = RequestMethod.GET)
+	public void showImg3(HttpServletResponse response, int id) throws IOException {
+		InputStream in = new ByteArrayInputStream(fileService.getFileBodyById(id));
+		response.setContentType(MediaType.IMAGE_JPEG_VALUE);
+		IOUtils.copy(in, response.getOutputStream());
 	}
 }

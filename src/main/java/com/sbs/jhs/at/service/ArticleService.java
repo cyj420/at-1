@@ -106,6 +106,9 @@ public class ArticleService {
 
 		String fileIdsStr = (String) param.get("fileIdsStr");
 
+		System.out.println("=================================");
+		System.out.println("fileIdsStr : " + fileIdsStr);
+		System.out.println("=================================");
 		if (fileIdsStr != null && fileIdsStr.length() > 0) {
 			List<Integer> fileIds = Arrays.asList(fileIdsStr.split(",")).stream().map(s -> Integer.parseInt(s.trim()))
 					.collect(Collectors.toList());

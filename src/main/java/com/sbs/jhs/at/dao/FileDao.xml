@@ -133,8 +133,7 @@
 		WHERE
 		relTypeCode = #{relTypeCode}
 		AND relId = #{relId}
-		AND typeCode =
-		#{typeCode}
+		AND typeCode = #{typeCode}
 		AND type2Code = #{type2Code}
 		AND fileNo = #{fileNo}
 	</select>
